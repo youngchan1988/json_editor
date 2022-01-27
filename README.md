@@ -35,7 +35,6 @@ JsonEditor(
 You can initial with json text:
 
 ```dart
-```dart
 import 'package:json_edior/json_editor.dart';
 
 JsonEditor(
@@ -59,7 +58,6 @@ JsonEditor(
 Or initial with json object:
 
 ```dart
-```dart
 import 'package:json_editor/json_editor.dart';
 
 JsonEditor(
@@ -74,7 +72,6 @@ JsonEditor(
         print(value);
     },
 )
-```
 ```
 
 If have  both `jsonString` and `jsonEditor` , first to parse `jsonString`.
@@ -105,7 +102,6 @@ JsonEditorTheme(
     )
 )
 ```
-
 
 
 # License
