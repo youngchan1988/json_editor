@@ -3,7 +3,6 @@ description: A json editor on flutter.
 version: 0.0.2
 repository: https://github.com/youngchan1988/json_editor
 issue_tracker: https://github.com/youngchan1988/json_editor/issues
-publish_to: https://pub.dev
 
 environment:
   sdk: ">=2.15.0 <3.0.0"
