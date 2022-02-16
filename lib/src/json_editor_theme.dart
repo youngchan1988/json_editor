@@ -23,36 +23,7 @@ class JsonEditorThemeData {
   JsonEditorThemeData({required this.lightTheme, this.darkTheme});
 
   factory JsonEditorThemeData.defaultTheme() => JsonEditorThemeData(
-      lightTheme: JsonTheme(
-          defaultStyle:
-              TextStyle(color: Colors.blueGrey.shade900, fontSize: 14),
-          bracketStyle:
-              TextStyle(color: Colors.blueGrey.shade900, fontSize: 14),
-          numberStyle: TextStyle(color: Colors.blue.shade500, fontSize: 14),
-          stringStyle: TextStyle(color: Colors.green.shade800, fontSize: 14),
-          boolStyle: TextStyle(color: Colors.orange.shade800, fontSize: 14),
-          keyStyle: TextStyle(color: Colors.blueGrey.shade600, fontSize: 14),
-          commentStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-          errorStyle: TextStyle(
-              color: Colors.red.shade600,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              decoration: TextDecoration.underline)),
-      darkTheme: JsonTheme(
-          defaultStyle: TextStyle(color: Colors.white, fontSize: 14),
-          bracketStyle: TextStyle(color: Colors.white70, fontSize: 14),
-          numberStyle: TextStyle(color: Colors.blue.shade500, fontSize: 14),
-          stringStyle: TextStyle(color: Colors.green.shade800, fontSize: 14),
-          boolStyle: TextStyle(color: Colors.orange.shade800, fontSize: 14),
-          keyStyle: TextStyle(color: Colors.blueGrey.shade200, fontSize: 14),
-          commentStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-          errorStyle: TextStyle(
-              color: Colors.red.shade600,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              decoration: TextDecoration.underline)));
+      lightTheme: JsonTheme.light(), darkTheme: JsonTheme.dark());
 
   final JsonTheme lightTheme;
   final JsonTheme? darkTheme;

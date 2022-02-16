@@ -40,6 +40,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _darkMode = false;
+  JsonElement? _elementResult;
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +69,35 @@ class _MyHomePageState extends State<MyHomePage> {
                       'Dark Mode',
                       style: TextStyle(
                           color: _darkMode ? Colors.white : Colors.black),
-                    )
+                    ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ObjectDemoPage(
+                                    obj: _elementResult?.toObject(),
+                                  )));
+                        },
+                        child: Text('Object Demo')),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ElementDemoPage(
+                                    element: _elementResult,
+                                  )));
+                        },
+                        child: Text('Element Demo')),
                   ],
                 ),
                 Expanded(
                   child: Theme(
                     data: _darkMode ? ThemeData.dark() : ThemeData.light(),
-                    child: JsonEditor(
-                      enabled: true,
+                    child: JsonEditor.string(
                       jsonString: '''
                       {
                         // This is a comment
@@ -86,14 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         "cities": ["beijing", "shanghai", "shenzhen"]
                       }
                       // ''',
-                      // jsonValue: const {
-                      //   "name": "young",
-                      //   "number": 100,
-                      //   "boo": true,
-                      //   "user": {"age": 20, "tall": 1.8},
-                      //   "cities": ["beijing", "shanghai", "shenzhen"]
-                      // },
-                      onValue: (value) {
+                      onValueChanged: (value) {
+                        _elementResult = value;
                         print(value);
                       },
                     ),
@@ -101,5 +117,58 @@ class _MyHomePageState extends State<MyHomePage> {
                 )
               ],
             )));
+  }
+}
+
+class ObjectDemoPage extends StatelessWidget {
+  const ObjectDemoPage({Key? key, this.obj}) : super(key: key);
+
+  final Object? obj;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Object Demo'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: JsonEditor.object(
+          object: obj,
+          onValueChanged: (value) {
+            var json = value.toJson();
+            print(json);
+            var fromJson = JsonElement.fromJson(json);
+            print(fromJson);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ElementDemoPage extends StatelessWidget {
+  const ElementDemoPage({Key? key, this.element}) : super(key: key);
+
+  final JsonElement? element;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Element Demo'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: JsonEditor.element(
+          element: element,
+          onValueChanged: (value) {
+            var json = value.toJson();
+            print(json);
+            var fromJson = JsonElement.fromJson(json);
+            print(fromJson);
+          },
+        ),
+      ),
+    );
   }
 }

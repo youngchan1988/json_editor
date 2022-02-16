@@ -6,3 +6,5 @@ library json_editor;
 
 export 'src/json_editor_main.dart';
 export 'src/json_editor_theme.dart';
+export 'src/rich_text_field/highlight_theme/json_theme.dart';
+export 'src/json_editor_model.dart';

@@ -142,10 +142,15 @@ class SimpleToken extends Token {
 }
 
 class BeginToken extends SimpleToken {
-  BeginToken({required TokenType type, int charOffset = 0, int line = 0})
+  BeginToken(
+      {required TokenType type,
+      int charOffset = 0,
+      int line = 0,
+      CommentToken? comments})
       : assert(type == TokenType.OPEN_CURLY_BRACKET ||
             type == TokenType.OPEN_SQUARE_BRACKET),
-        super(type: type, charOffset: charOffset, line: line);
+        super(
+            type: type, charOffset: charOffset, line: line, comments: comments);
 
   Token? endToken;
 }

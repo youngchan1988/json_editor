@@ -192,7 +192,10 @@ abstract class Scanner {
   /// An operator token represent operators like ':'
   void appendPrecedenceToken(TokenType type) {
     appendToken(SimpleToken(
-        type: type, charOffset: tokenStart, line: lineStarts.length));
+      type: type,
+      charOffset: tokenStart,
+      line: lineStarts.length,
+    ));
   }
 
   /// Notifies scanning a whitespace character. Note that [appendWhiteSpace] is
@@ -218,8 +221,11 @@ abstract class Scanner {
   /// Appends a token that begins a new group, represented by [type].
   /// Group begin tokens are '{' and '['.
   void appendBeginGroup(TokenType type) {
-    var token =
-        BeginToken(type: type, charOffset: tokenStart, line: lineStarts.length);
+    var token = BeginToken(
+        type: type,
+        charOffset: tokenStart,
+        line: lineStarts.length,
+        comments: comments);
     appendToken(token);
     groupingStack = groupingStack.prepend(token);
   }
@@ -356,7 +362,7 @@ abstract class Scanner {
       return tokenizeComment(next);
     }
 
-    if (next >= $1 && next <= $9) {
+    if (next >= $0 && next <= $9) {
       return tokenizeNumber(next);
     }
 

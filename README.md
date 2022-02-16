@@ -22,22 +22,12 @@ dependencies:
 
 ## Usage
 
-```dart
-import 'package:json_editor/json_editor.dart';
-
-JsonEditor(
-    onValue: (value) {
-        print(value);
-    },
-)
-```
-
 You can initial with json text:
 
 ```dart
 import 'package:json_edior/json_editor.dart';
 
-JsonEditor(
+JsonEditor.string(
     jsonString: '''
         {
             // This is a comment
@@ -48,7 +38,7 @@ JsonEditor(
             "cities": ["beijing", "shanghai", "shenzhen"]
          }
     ''',
-    onValue: (value) {
+    onValueChanged: (value) {
         print(value);
     },
 )
@@ -60,23 +50,43 @@ Or initial with json object:
 ```dart
 import 'package:json_editor/json_editor.dart';
 
-JsonEditor(
-    jsonValue: const {
+JsonEditor.object(
+    object: const {
         "name": "young",
         "number": 100,
         "boo": true,
         "user": {"age": 20, "tall": 1.8},
         "cities": ["beijing", "shanghai", "shenzhen"]
     },
-    onValue: (value) {
+    onValueChanged: (value) {
         print(value);
     },
 )
 ```
 
-If have  both `jsonString` and `jsonEditor` , first to parse `jsonString`.
+Or initial with JsonElement:
 
-The `onValue` output a Map or a List object. If there is some errors in json text. The closure will not be called.
+```dart
+import 'package:json_editor/json_editor.dart';
+
+JsonEditor.element(
+    element: JsonElement(
+            value: [
+              JsonElement(
+                  key: "name",
+                  value: "YoungChan",
+                  valueType: JsonElementValueType.string,
+                  comment: "A comment")
+            ],
+            valueType: JsonElementValueType.map,
+          ),
+    onValueChanged: (value) {
+        print(value);
+    },
+)
+```
+
+The `onValueChanged` output a Map or a List object. If there is some errors in json text. The closure will not be called.
 
 ### Theme
 
@@ -88,18 +98,21 @@ JsonEditorTheme(
         lightTheme: JsonEditorThemeData.defaultTheme().lightTheme.copyWith(bracketStyle: TextStyle(color: Colors.amber, fontSize: 16)),
         darkTheme: JsonEditorThemeData.defaultTheme().darkTheme
     ),
-    child: JsonEditor(
-        jsonValue: const {
-            "name": "young",
-            "number": 100,
-            "boo": true,
-            "user": {"age": 20, "tall": 1.8},
-            "cities": ["beijing", "shanghai", "shenzhen"]
-        },
-        onValue: (value) {
-            print(value);
-        },
-    )
+    child: JsonEditor.string(
+            jsonString: '''
+                {
+                    // This is a comment
+                    "name": "young chan",
+                    "number": 100,
+                    "boo": true,
+                    "user": {"age": 20, "tall": 1.8},
+                    "cities": ["beijing", "shanghai", "shenzhen"]
+                }
+            ''',
+            onValueChanged: (value) {
+                print(value);
+            },
+        )
 )
 ```
 

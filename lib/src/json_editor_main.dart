@@ -7,35 +7,94 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_editor/src/analyzer/analyzer.dart';
-import 'package:json_editor/src/analyzer/lexer/lexer.dart';
-import 'package:json_editor/src/analyzer/lexer/token.dart';
+import 'package:json_editor/src/json_editor_model.dart';
+import 'package:json_editor/src/util/logger.dart';
 
 import 'rich_text_field/rich_text_editing_controller.dart';
 import 'util/string_util.dart';
 
-const _indentSpace = '    ';
-
 class JsonEditor extends StatefulWidget {
-  const JsonEditor(
+  const JsonEditor._(
       {Key? key,
       this.jsonString,
-      this.jsonValue,
+      this.jsonObj,
       this.enabled = true,
-      this.onValue})
-      : assert(jsonValue == null || (jsonValue is Map || jsonValue is List)),
+      this.onValueChanged})
+      : assert(jsonObj == null || jsonObj is Map || jsonObj is List),
         super(key: key);
 
-  /// if [jsonString] and [jsonValue] have both. First to parse jsonString.
-  final String? jsonString;
+  factory JsonEditor.string(
+          {Key? key,
+          String? jsonString,
+          bool enabled = true,
+          ValueChanged<JsonElement>? onValueChanged}) =>
+      JsonEditor._(
+          key: key,
+          jsonString: jsonString,
+          enabled: enabled,
+          onValueChanged: onValueChanged);
 
-  /// if [jsonString] and [jsonValue] have both. First to parse jsonString.
-  /// [jsonValue] must be a Map or a List.
-  final Object? jsonValue;
+  factory JsonEditor.object(
+          {Key? key,
+          Object? object,
+          bool enabled = true,
+          ValueChanged<JsonElement>? onValueChanged}) =>
+      JsonEditor._(
+        key: key,
+        jsonObj: object,
+        enabled: enabled,
+        onValueChanged: onValueChanged,
+      );
+
+  factory JsonEditor.element(
+          {Key? key,
+          JsonElement? element,
+          bool enabled = true,
+          ValueChanged<JsonElement>? onValueChanged}) =>
+      JsonEditor._(
+        key: key,
+        jsonString: element?.toString(),
+        enabled: enabled,
+        onValueChanged: onValueChanged,
+      );
+
+  final String? jsonString;
+  final Object? jsonObj;
 
   final bool enabled;
 
   /// Output the decoded json object.
-  final ValueChanged<Object>? onValue;
+  final ValueChanged<JsonElement>? onValueChanged;
+
+  static Map<String, JsonElement> _fromValue(Map map) {
+    return map.map((key, value) {
+      if (value is Map) {
+        return MapEntry(key, JsonElement(value: _fromValue(value)));
+      } else if (value is List) {
+        return MapEntry(key, JsonElement(value: _fromValueList(value)));
+      } else if (value is JsonElement) {
+        return MapEntry(key, value);
+      } else {
+        return MapEntry(key, JsonElement(value: value));
+      }
+    });
+  }
+
+  static List _fromValueList(List list) {
+    var result = [];
+    for (var v in list) {
+      if (v is Map) {
+        result.add(JsonElement(value: _fromValue(v)));
+      } else if (v is List) {
+        result.add(JsonElement(value: _fromValueList(v)));
+      } else if (v is JsonElement) {
+        result.add(v);
+      } else {
+        result.add(JsonElement(value: v));
+      }
+    }
+    return result;
+  }
 
   @override
   _JsonEditorState createState() => _JsonEditorState();
@@ -57,10 +116,19 @@ class _JsonEditorState extends State<JsonEditor> {
   void initState() {
     if (widget.jsonString != null) {
       _editController.text = widget.jsonString!;
-      _reformat();
-    } else if (widget.jsonValue != null) {
-      _editController.text = _formatJsonValue(widget.jsonValue!);
-      _reformat();
+      if (!_analyze()) {
+        _reformat();
+      }
+    } else if (widget.jsonObj != null) {
+      try {
+        _editController.text = jsonEncode(widget.jsonObj);
+        if (!_analyze()) {
+          _reformat();
+        }
+      } catch (e) {
+        _errMessage = e.toString();
+        error(object: this, message: 'initState error', err: e);
+      }
     }
     _editFocus.addListener(() {
       if (!_editFocus.hasFocus) {
@@ -72,13 +140,18 @@ class _JsonEditorState extends State<JsonEditor> {
 
   @override
   void didUpdateWidget(covariant JsonEditor oldWidget) {
-    if (!widget.enabled) {
-      if (widget.jsonString != null) {
-        _editController.text = widget.jsonString!;
+    if (widget.jsonString != oldWidget.jsonString) {
+      _editController.text = widget.jsonString!;
+      if (!_analyze()) {
         _reformat();
-      } else if (widget.jsonValue != null) {
-        _editController.text = _formatJsonValue(widget.jsonValue!);
+      }
+    } else if (widget.jsonObj != oldWidget.jsonObj) {
+      try {
+        _editController.text = jsonEncode(widget.jsonObj);
         _reformat();
+      } catch (e) {
+        _errMessage = e.toString();
+        error(object: this, message: 'didUpdateWidget error', err: e);
       }
     }
     super.didUpdateWidget(oldWidget);
@@ -99,7 +172,10 @@ class _JsonEditorState extends State<JsonEditor> {
         focusNode: _editFocus,
         controller: _editController,
         decoration: InputDecoration(
-            border: InputBorder.none, isDense: true, errorText: _errMessage),
+            border: InputBorder.none,
+            isDense: true,
+            errorText: _errMessage,
+            errorMaxLines: 10),
         keyboardType: TextInputType.multiline,
         expands: true,
         maxLines: null,
@@ -146,7 +222,6 @@ class _JsonEditorState extends State<JsonEditor> {
         _editController.text = s.removeCharAt(editingOffset);
         _editController.selection =
             TextSelection.fromPosition(TextPosition(offset: editingOffset));
-        _analyze();
         return;
       }
     }
@@ -154,7 +229,6 @@ class _JsonEditorState extends State<JsonEditor> {
       _editController.text = s.insertStringAt(editingOffset, close);
       _editController.selection =
           TextSelection.fromPosition(TextPosition(offset: editingOffset));
-      _analyze();
     }
   }
 
@@ -183,9 +257,9 @@ class _JsonEditorState extends State<JsonEditor> {
 
       var sub = s.substring(p, editingOffset - 1);
       var indent = '';
-      while (sub.indexOf(_indentSpace) == 0) {
+      while (sub.indexOf(jsonFormatIndent) == 0) {
         sub = sub.substring(4);
-        indent += _indentSpace;
+        indent += jsonFormatIndent;
       }
       if (indent.isNotEmpty) {
         _editController.text = s.insertStringAt(editingOffset, indent);
@@ -194,7 +268,7 @@ class _JsonEditorState extends State<JsonEditor> {
       }
       if (lastPreWord == '{' || lastPreWord == '[') {
         //缩进
-        var newIndent = indent + _indentSpace;
+        var newIndent = indent + jsonFormatIndent;
         if (editingWord == '}' || editingWord == ']') {
           newIndent += '\n' + indent;
         }
@@ -205,55 +279,40 @@ class _JsonEditorState extends State<JsonEditor> {
     }
   }
 
-  String _formatJsonValue(Object jsonValue) {
-    var jsonString = '';
-    try {
-      jsonString = jsonEncode(jsonValue);
-    } catch (e) {
-      _errMessage = e.toString();
-    }
-    return jsonString;
-  }
-
-  void _analyze() {
+  bool _analyze() {
     _lastInput = DateTime.now();
     _editController.analyzeError = null;
+    var hasError = false;
     Future.delayed(const Duration(seconds: 1)).then((value) {
       if (DateTime.now().difference(_lastInput!) >=
               const Duration(seconds: 1) &&
           _editController.text.isNotEmpty) {
-        var error = _analyzer.analyze(_editController.text);
-        _editController.analyzeError = error;
-        if (error == null) {
+        var err = _analyzer.analyze(_editController.text);
+        _editController.analyzeError = err;
+        if (err == null) {
           setState(() {
             _errMessage = '';
           });
           try {
-            var value = _decodeJsonValue(_editController.text);
-            widget.onValue?.call(value);
+            var value = JsonElement.fromString(_editController.text);
+            widget.onValueChanged?.call(value);
           } catch (e) {
+            hasError = true;
+            error(object: this, message: 'analyze error', err: e);
             setState(() {
               _errMessage = e.toString();
             });
           }
         } else {
+          hasError = true;
           setState(() {
-            _errMessage = error.toString();
+            error(object: this, message: 'analyze error', err: err);
+            _errMessage = err.toString();
           });
         }
-        // try {
-        //   var m = jsonDecode(_editController.text);
-        //   widget.onValue?.call(m);
-        //   setState(() {
-        //     _errMessage = '';
-        //   });
-        // } catch (error) {
-        //   setState(() {
-        //     _errMessage = error.toString();
-        //   });
-        // }
       }
     });
+    return hasError;
   }
 
   /// 格式化, 在编辑区失焦后执行
@@ -261,61 +320,7 @@ class _JsonEditorState extends State<JsonEditor> {
     if (_editController.text.isEmpty) {
       return;
     }
-    var error = _analyzer.analyze(_editController.text);
-    if (error == null) {
-      var tokens = Lexer().scan(_editController.text);
-      var reformatText = '';
-      var lastLineIndentNumber = 0;
-      while (!tokens.isEof) {
-        if (tokens.precedingComments != null) {
-          var commentText =
-              '${tokens.precedingComments!.toString()}\n${_createIndentSpace(lastLineIndentNumber)}';
-          var nextComment = tokens.precedingComments?.next;
-          while (nextComment is CommentToken) {
-            commentText +=
-                '${nextComment.toString()}\n${_createIndentSpace(lastLineIndentNumber)}';
-            nextComment = nextComment.next;
-          }
-          reformatText += commentText;
-        }
-        reformatText += tokens.lexeme;
-        if (tokens.lexeme == '{' || tokens.lexeme == '[') {
-          lastLineIndentNumber++;
-          reformatText += '\n${_createIndentSpace(lastLineIndentNumber)}';
-        } else if (tokens.lexeme == ':') {
-          reformatText += '  ';
-        }
-        if (tokens.next?.lexeme == '}' ||
-            tokens.next?.lexeme == ']' ||
-            tokens.next?.isEof == true) {
-          lastLineIndentNumber =
-              lastLineIndentNumber > 0 ? --lastLineIndentNumber : 0;
-          reformatText += '\n${_createIndentSpace(lastLineIndentNumber)}';
-        } else if (tokens.lexeme == ',') {
-          reformatText += '\n${_createIndentSpace(lastLineIndentNumber)}';
-        }
-
-        tokens = tokens.next!;
-      }
-      _editController.text = reformatText;
-    }
-  }
-
-  String _createIndentSpace(int number) {
-    var indent = '';
-    for (var i = 0; i < number; i++) {
-      indent += _indentSpace;
-    }
-    return indent;
-  }
-
-  dynamic _decodeJsonValue(String input) {
-    var tokens = Lexer().scan(input);
-    var jsonText = '';
-    while (!tokens.isEof) {
-      jsonText += tokens.lexeme;
-      tokens = tokens.next!;
-    }
-    return jsonDecode(jsonText);
+    _editController.text =
+        JsonElement.format(_editController.text, analyzer: _analyzer);
   }
 }
