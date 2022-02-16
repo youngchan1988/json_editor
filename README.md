@@ -11,7 +11,7 @@
 
 ```yaml
 dependencies:
-    json_editor: ^0.0.1
+    json_editor: ^0.0.2
 ```
 
 ## Screen Shot
@@ -21,6 +21,16 @@ dependencies:
 ![](https://tva1.sinaimg.cn/large/008i3skNgy1gyscug2rpbg30qo0f0nh5.gif)
 
 ## Usage
+
+```dart
+import 'package:json_editor/json_editor.dart';
+
+JsonEditor(
+    onValue: (value) {
+        print(value);
+    },
+)
+```
 
 You can initial with json text:
 
@@ -64,29 +74,22 @@ JsonEditor.object(
 )
 ```
 
-Or initial with JsonElement:
+Or initial with element data model:
 
 ```dart
 import 'package:json_editor/json_editor.dart';
 
 JsonEditor.element(
-    element: JsonElement(
-            value: [
-              JsonElement(
-                  key: "name",
-                  value: "YoungChan",
-                  valueType: JsonElementValueType.string,
-                  comment: "A comment")
-            ],
-            valueType: JsonElementValueType.map,
-          ),
+    element: JsonElement(),
     onValueChanged: (value) {
         print(value);
     },
 )
 ```
 
-The `onValueChanged` output a Map or a List object. If there is some errors in json text. The closure will not be called.
+If have  both `jsonString` and `jsonEditor` , first to parse `jsonString`.
+
+The `onValue` output a Map or a List object. If there is some errors in json text. The closure will not be called.
 
 ### Theme
 
@@ -94,28 +97,21 @@ If you want to custom the json theme. You can use `JsonEditorTheme` widget.
 
 ```dart
 JsonEditorTheme(
-    themeData: JsonEditorThemeData(
-        lightTheme: JsonEditorThemeData.defaultTheme().lightTheme.copyWith(bracketStyle: TextStyle(color: Colors.amber, fontSize: 16)),
-        darkTheme: JsonEditorThemeData.defaultTheme().darkTheme
-    ),
-    child: JsonEditor.string(
-            jsonString: '''
-                {
-                    // This is a comment
-                    "name": "young chan",
-                    "number": 100,
-                    "boo": true,
-                    "user": {"age": 20, "tall": 1.8},
-                    "cities": ["beijing", "shanghai", "shenzhen"]
-                }
-            ''',
-            onValueChanged: (value) {
-                print(value);
-            },
-        )
+    themeData: JsonEditorThemeData.defaultTheme(),
+    child: JsonEditor.object(
+        object: const {
+            "name": "young",
+            "number": 100,
+            "boo": true,
+            "user": {"age": 20, "tall": 1.8},
+            "cities": ["beijing", "shanghai", "shenzhen"]
+        },
+        onValueChanged: (value) {
+            print(value);
+        },
+    )
 )
 ```
-
 
 # License
 
