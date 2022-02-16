@@ -5,7 +5,7 @@
 1. Support add comment;
 2. Support show errors for invalid json text;
 3. Pretty format json text;
-4. Output the decoded Map or List object;
+4. Output a custom json data model: `JsonElement` ;
 
 ## Getting started
 
@@ -21,18 +21,6 @@ dependencies:
 ![](https://tva1.sinaimg.cn/large/008i3skNgy1gyscug2rpbg30qo0f0nh5.gif)
 
 ## Usage
-
-```dart
-import 'package:json_editor/json_editor.dart';
-
-JsonEditor(
-    onValue: (value) {
-        print(value);
-    },
-)
-```
-
-You can initial with json text:
 
 ```dart
 import 'package:json_edior/json_editor.dart';
@@ -55,8 +43,6 @@ JsonEditor.string(
 
 ```
 
-Or initial with json object:
-
 ```dart
 import 'package:json_editor/json_editor.dart';
 
@@ -74,7 +60,7 @@ JsonEditor.object(
 )
 ```
 
-Or initial with element data model:
+`JsonElement` is a data model witch contains `key`, `value` and `comment`.
 
 ```dart
 import 'package:json_editor/json_editor.dart';
@@ -85,11 +71,8 @@ JsonEditor.element(
         print(value);
     },
 )
+
 ```
-
-If have  both `jsonString` and `jsonEditor` , first to parse `jsonString`.
-
-The `onValue` output a Map or a List object. If there is some errors in json text. The closure will not be called.
 
 ### Theme
 
