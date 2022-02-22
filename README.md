@@ -11,7 +11,7 @@
 
 ```yaml
 dependencies:
-    json_editor: ^0.0.2
+    json_editor: ^0.0.3
 ```
 
 ## Screen Shot
