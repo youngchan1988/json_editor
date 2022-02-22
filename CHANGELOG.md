@@ -1,3 +1,7 @@
+## 0.0.3
+
+- Fix call `setState` after dispose.
+
 ## 0.0.2
 
 - Add json data model to storage key, value and comment;

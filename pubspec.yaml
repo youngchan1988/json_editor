@@ -1,6 +1,6 @@
 name: json_editor
 description: A json editor on flutter.
-version: 0.0.2
+version: 0.0.3
 repository: https://github.com/youngchan1988/json_editor
 issue_tracker: https://github.com/youngchan1988/json_editor/issues
 

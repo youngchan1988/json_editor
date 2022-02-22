@@ -289,26 +289,28 @@ class _JsonEditorState extends State<JsonEditor> {
           _editController.text.isNotEmpty) {
         var err = _analyzer.analyze(_editController.text);
         _editController.analyzeError = err;
-        if (err == null) {
-          setState(() {
-            _errMessage = '';
-          });
-          try {
-            var value = JsonElement.fromString(_editController.text);
-            widget.onValueChanged?.call(value);
-          } catch (e) {
-            hasError = true;
-            error(object: this, message: 'analyze error', err: e);
+        if (mounted) {
+          if (err == null) {
             setState(() {
-              _errMessage = e.toString();
+              _errMessage = '';
+            });
+            try {
+              var value = JsonElement.fromString(_editController.text);
+              widget.onValueChanged?.call(value);
+            } catch (e) {
+              hasError = true;
+              error(object: this, message: 'analyze error', err: e);
+              setState(() {
+                _errMessage = e.toString();
+              });
+            }
+          } else {
+            hasError = true;
+            setState(() {
+              error(object: this, message: 'analyze error', err: err);
+              _errMessage = err.toString();
             });
           }
-        } else {
-          hasError = true;
-          setState(() {
-            error(object: this, message: 'analyze error', err: err);
-            _errMessage = err.toString();
-          });
         }
       }
     });
