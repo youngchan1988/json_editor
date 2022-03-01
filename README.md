@@ -23,7 +23,7 @@ dependencies:
 ## Usage
 
 ```dart
-import 'package:json_edior/json_editor.dart';
+import 'package:json_editor/json_editor.dart';
 
 JsonEditor.string(
     jsonString: '''
