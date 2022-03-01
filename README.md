@@ -11,7 +11,7 @@
 
 ```yaml
 dependencies:
-    json_editor: ^0.0.3
+    json_editor: ^0.0.4
 ```
 
 ## Screen Shot
@@ -23,7 +23,7 @@ dependencies:
 ## Usage
 
 ```dart
-import 'package:json_edior/json_editor.dart';
+import 'package:json_editor/json_editor.dart';
 
 JsonEditor.string(
     jsonString: '''

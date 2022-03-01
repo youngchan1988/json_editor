@@ -9,7 +9,7 @@ var _logger = Logger(
   level: kReleaseMode ? Level.info : Level.debug,
   printer: PrettyPrinter(
       stackTraceBeginIndex: 1,
-      methodCount: 5,
+      methodCount: 2,
       errorMethodCount: 8,
       lineLength: 120,
       colors: true,

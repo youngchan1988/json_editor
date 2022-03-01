@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:json_editor/src/analyzer/analyzer.dart';
 import 'package:json_editor/src/json_editor_model.dart';
 import 'package:json_editor/src/util/logger.dart';
+import 'package:json_editor/src/util/undo_redo.dart';
 
 import 'rich_text_field/rich_text_editing_controller.dart';
 import 'util/string_util.dart';
@@ -105,6 +106,7 @@ class _JsonEditorState extends State<JsonEditor> {
   final _focus = FocusNode();
   final _editFocus = FocusNode();
   final _analyzer = JsonAnalyzer();
+  final _undoRedo = UndoRedo();
 
   DateTime? _lastInput;
 
@@ -119,12 +121,14 @@ class _JsonEditorState extends State<JsonEditor> {
       if (!_analyze()) {
         _reformat();
       }
+      _undoRedo.set(_editController.text);
     } else if (widget.jsonObj != null) {
       try {
         _editController.text = jsonEncode(widget.jsonObj);
         if (!_analyze()) {
           _reformat();
         }
+        _undoRedo.set(_editController.text);
       } catch (e) {
         _errMessage = e.toString();
         error(object: this, message: 'initState error', err: e);
@@ -133,6 +137,7 @@ class _JsonEditorState extends State<JsonEditor> {
     _editFocus.addListener(() {
       if (!_editFocus.hasFocus) {
         _reformat();
+        _undoRedo.input(_editController.text);
       }
     });
     super.initState();
@@ -145,10 +150,12 @@ class _JsonEditorState extends State<JsonEditor> {
       if (!_analyze()) {
         _reformat();
       }
+      _undoRedo.set(_editController.text);
     } else if (widget.jsonObj != oldWidget.jsonObj) {
       try {
         _editController.text = jsonEncode(widget.jsonObj);
         _reformat();
+        _undoRedo.set(_editController.text);
       } catch (e) {
         _errMessage = e.toString();
         error(object: this, message: 'didUpdateWidget error', err: e);
@@ -165,6 +172,26 @@ class _JsonEditorState extends State<JsonEditor> {
         // debug(object: this, message: 'Key event: ${keyEvent.toString()}');
         if (keyEvent is RawKeyDownEvent) {
           _currentKeyEvent = keyEvent;
+          if (keyEvent.isControlPressed &&
+              keyEvent.logicalKey == LogicalKeyboardKey.keyZ) {
+            if (keyEvent.isShiftPressed) {
+              //Redo
+
+              var s = _undoRedo.redo();
+              debug(tag: 'UndoRedo', message: 'Redo=>\n$s');
+              if (s != null) {
+                _editController.text = s;
+              }
+            } else {
+              //Undo
+
+              var s = _undoRedo.undo();
+              debug(tag: 'UndoRedo', message: 'Undo=>\n$s');
+              if (s != null) {
+                _editController.text = s;
+              }
+            }
+          }
         }
       },
       child: TextField(
@@ -181,14 +208,12 @@ class _JsonEditorState extends State<JsonEditor> {
         maxLines: null,
         minLines: null,
         onChanged: (s) {
-          //当前编辑光标输入的字符
           if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.enter) {
-            //回车键处理
+            // Enter key
             var editingOffset = _editController.selection.baseOffset;
             if (editingOffset == 0) {
               return;
             }
-            //当前编辑光标输入的字符
             _enterFormat();
           } else if (_currentKeyEvent?.logicalKey ==
                   LogicalKeyboardKey.braceLeft ||
@@ -201,8 +226,10 @@ class _JsonEditorState extends State<JsonEditor> {
           } else if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.quote) {
             _closingFormat(open: '"', close: '"');
           }
+          _lastInput = DateTime.now();
           //Analyze json syntax
           _analyze();
+          _undoRedoInput(s);
         },
       ),
     );
@@ -232,7 +259,7 @@ class _JsonEditorState extends State<JsonEditor> {
     }
   }
 
-  ///parse 回车操作
+  ///Parse enter
   void _enterFormat() {
     var editingOffset = _editController.selection.baseOffset;
     if (editingOffset < 2) {
@@ -280,13 +307,13 @@ class _JsonEditorState extends State<JsonEditor> {
   }
 
   bool _analyze() {
-    _lastInput = DateTime.now();
     _editController.analyzeError = null;
     var hasError = false;
     Future.delayed(const Duration(seconds: 1)).then((value) {
-      if (DateTime.now().difference(_lastInput!) >=
-              const Duration(seconds: 1) &&
-          _editController.text.isNotEmpty) {
+      if (_lastInput == null ||
+          DateTime.now().difference(_lastInput!) >=
+                  const Duration(seconds: 1) &&
+              _editController.text.isNotEmpty) {
         var err = _analyzer.analyze(_editController.text);
         _editController.analyzeError = err;
         if (mounted) {
@@ -317,12 +344,27 @@ class _JsonEditorState extends State<JsonEditor> {
     return hasError;
   }
 
-  /// 格式化, 在编辑区失焦后执行
+  /// Format code when TextField out of focus.
   void _reformat() {
     if (_editController.text.isEmpty) {
       return;
     }
     _editController.text =
         JsonElement.format(_editController.text, analyzer: _analyzer);
+  }
+
+  void _undoRedoInput(String s) {
+    if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.enter ||
+        _currentKeyEvent?.logicalKey == LogicalKeyboardKey.space) {
+      _undoRedo.input(s);
+    } else {
+      Future.delayed(const Duration(seconds: 1)).then((value) {
+        if (DateTime.now().difference(_lastInput!) >=
+                const Duration(seconds: 1) &&
+            _editController.text != _undoRedo.current) {
+          _undoRedo.input(s);
+        }
+      });
+    }
   }
 }

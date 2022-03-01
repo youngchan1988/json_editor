@@ -120,7 +120,7 @@ class JsonAnalyzer {
           character: token.lexeme,
           charOffset: token.charOffset,
           line: token.line,
-          message: "Json value should be a String, Number or Bool");
+          message: "Json value should be a String, Number, Bool, Array or Map");
     }
   }
 
@@ -130,19 +130,7 @@ class JsonAnalyzer {
     var advanceToken = token.next!;
     Error? error;
     while (!advanceToken.isEof && !optional(']', advanceToken)) {
-      if (optional('{', advanceToken)) {
-        advanceToken = _analyzeObject(advanceToken);
-      } else if (optional('[', advanceToken)) {
-        advanceToken = _analyzeArray(advanceToken);
-      } else if (_isValueToken(advanceToken)) {
-        advanceToken = _analyzeValue(advanceToken);
-      } else {
-        error = SyntaxError(
-            character: advanceToken.lexeme,
-            charOffset: advanceToken.charOffset,
-            line: advanceToken.line);
-        break;
-      }
+      advanceToken = _analyzeValue(advanceToken);
     }
     if (error == null) {
       if (optional(']', advanceToken)) {
