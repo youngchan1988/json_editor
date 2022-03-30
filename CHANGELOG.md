@@ -1,7 +1,11 @@
+## 0.0.5
+
+- fix; [(Feature Request) Add the support for khmer language · Issue #4 · youngchan1988/json_editor (github.com)](https://github.com/youngchan1988/json_editor/issues/4)
+
 ## 0.0.4
 
 - fix: [Embedded arrays parsing error · Issue #2 · youngchan1988/json_editor (github.com)](https://github.com/youngchan1988/json_editor/issues/2)
-- Support Undo **(ctrl+z)**, Redo **(ctrl+shift+z)** 
+- Support Undo **(ctrl+z)**, Redo **(ctrl+shift+z)**
 
 ## 0.0.3
 

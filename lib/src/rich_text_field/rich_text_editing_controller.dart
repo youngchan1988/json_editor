@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:json_editor/src/analyzer/error.dart';
 import 'package:json_editor/src/analyzer/lexer/error_token.dart';
@@ -20,7 +22,7 @@ class RichTextEditingController extends TextEditingController {
     notifyListeners();
   }
 
-  // 语法着色
+  // Grammar highlight
   TextSpan _buildRichText(
       {required BuildContext context, required String text, TextStyle? style}) {
     var jsonTheme = JsonEditorTheme.of(context)?.theme(context) ??
@@ -98,7 +100,8 @@ class RichTextEditingController extends TextEditingController {
     String unrenderedText = '';
     var offset = 0;
     var renderOffsets = spanMap.keys;
-    while (offset < text.characters.length) {
+    var utf8Codes = utf8.encode(text);
+    while (offset < text.length) {
       if (renderOffsets.contains(offset)) {
         if (unrenderedText.isNotEmpty) {
           children.add(
@@ -108,7 +111,8 @@ class RichTextEditingController extends TextEditingController {
         children.add(spanMap[offset]!);
         offset = renderEndOffset[offset]!;
       } else {
-        unrenderedText += text.characters.elementAt(offset++);
+        unrenderedText += text.substring(offset, offset + 1);
+        offset++;
       }
     }
     if (unrenderedText.isNotEmpty) {

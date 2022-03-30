@@ -241,11 +241,11 @@ class _JsonEditorState extends State<JsonEditor> {
     if (editingOffset == 0) {
       return;
     }
-    var editingLastWord = s.characters.elementAt(editingOffset - 1);
-    if (editingOffset < s.characters.length && editingOffset - 2 >= 0) {
-      if (s.characters.elementAt(editingOffset - 2) != '\\' &&
+    var editingLastWord = s.substring(editingOffset - 1, editingOffset);
+    if (editingOffset < s.length && editingOffset - 2 >= 0) {
+      if (s.substring(editingOffset - 2, editingOffset - 1) != '\\' &&
           editingLastWord == close &&
-          s.characters.elementAt(editingOffset) == close) {
+          s.substring(editingOffset, editingOffset + 1) == close) {
         _editController.text = s.removeCharAt(editingOffset);
         _editController.selection =
             TextSelection.fromPosition(TextPosition(offset: editingOffset));
@@ -268,14 +268,14 @@ class _JsonEditorState extends State<JsonEditor> {
     var s = _editController.text;
     String? editingWord;
     if (editingOffset < s.length) {
-      editingWord = s.characters.elementAt(editingOffset);
+      editingWord = s.substring(editingOffset, editingOffset + 1);
     }
-    var editingLastWord = s.characters.elementAt(editingOffset - 1);
-    var lastPreWord = s.characters.elementAt(editingOffset - 2);
+    var editingLastWord = s.substring(editingOffset - 1, editingOffset);
+    var lastPreWord = s.substring(editingOffset - 2, editingOffset - 1);
     if (editingLastWord == '\n') {
       var p = editingOffset - 2;
       while (p > 0) {
-        if (s.characters.elementAt(p) == '\n') {
+        if (s.substring(p, p + 1) == '\n') {
           p++;
           break;
         }
