@@ -15,35 +15,42 @@ import 'rich_text_field/rich_text_editing_controller.dart';
 import 'util/string_util.dart';
 
 class JsonEditor extends StatefulWidget {
-  const JsonEditor._(
+  JsonEditor._(
       {Key? key,
       this.jsonString,
       this.jsonObj,
       this.enabled = true,
+      this.openDebug = false,
       this.onValueChanged})
       : assert(jsonObj == null || jsonObj is Map || jsonObj is List),
-        super(key: key);
+        super(key: key) {
+    initialLogger(openDebug: openDebug);
+  }
 
   factory JsonEditor.string(
           {Key? key,
           String? jsonString,
           bool enabled = true,
+          bool openDebug = false,
           ValueChanged<JsonElement>? onValueChanged}) =>
       JsonEditor._(
           key: key,
           jsonString: jsonString,
           enabled: enabled,
+          openDebug: openDebug,
           onValueChanged: onValueChanged);
 
   factory JsonEditor.object(
           {Key? key,
           Object? object,
           bool enabled = true,
+          bool openDebug = false,
           ValueChanged<JsonElement>? onValueChanged}) =>
       JsonEditor._(
         key: key,
         jsonObj: object,
         enabled: enabled,
+        openDebug: openDebug,
         onValueChanged: onValueChanged,
       );
 
@@ -51,18 +58,20 @@ class JsonEditor extends StatefulWidget {
           {Key? key,
           JsonElement? element,
           bool enabled = true,
+          bool openDebug = false,
           ValueChanged<JsonElement>? onValueChanged}) =>
       JsonEditor._(
         key: key,
         jsonString: element?.toString(),
         enabled: enabled,
+        openDebug: openDebug,
         onValueChanged: onValueChanged,
       );
 
   final String? jsonString;
   final Object? jsonObj;
-
   final bool enabled;
+  final bool openDebug;
 
   /// Output the decoded json object.
   final ValueChanged<JsonElement>? onValueChanged;
@@ -118,14 +127,14 @@ class _JsonEditorState extends State<JsonEditor> {
   void initState() {
     if (widget.jsonString != null) {
       _editController.text = widget.jsonString!;
-      if (!_analyze()) {
+      if (!_analyzeSync()) {
         _reformat();
       }
       _undoRedo.set(_editController.text);
     } else if (widget.jsonObj != null) {
       try {
         _editController.text = jsonEncode(widget.jsonObj);
-        if (!_analyze()) {
+        if (!_analyzeSync()) {
           _reformat();
         }
         _undoRedo.set(_editController.text);
@@ -147,7 +156,7 @@ class _JsonEditorState extends State<JsonEditor> {
   void didUpdateWidget(covariant JsonEditor oldWidget) {
     if (widget.jsonString != oldWidget.jsonString) {
       _editController.text = widget.jsonString!;
-      if (!_analyze()) {
+      if (!_analyzeSync()) {
         _reformat();
       }
       _undoRedo.set(_editController.text);
@@ -306,42 +315,50 @@ class _JsonEditorState extends State<JsonEditor> {
     }
   }
 
-  bool _analyze() {
-    _editController.analyzeError = null;
+  bool _analyzeSync() {
     var hasError = false;
-    Future.delayed(const Duration(seconds: 1)).then((value) {
-      if (_lastInput == null ||
-          DateTime.now().difference(_lastInput!) >=
-                  const Duration(seconds: 1) &&
-              _editController.text.isNotEmpty) {
-        var err = _analyzer.analyze(_editController.text);
-        _editController.analyzeError = err;
-        if (mounted) {
-          if (err == null) {
-            setState(() {
-              _errMessage = '';
-            });
-            try {
-              var value = JsonElement.fromString(_editController.text);
-              widget.onValueChanged?.call(value);
-            } catch (e) {
-              hasError = true;
-              error(object: this, message: 'analyze error', err: e);
-              setState(() {
-                _errMessage = e.toString();
-              });
-            }
-          } else {
+    var text = _editController.text;
+    if (text.isNotEmpty) {
+      var err = _analyzer.analyze(text);
+      _editController.analyzeError = err;
+      if (mounted) {
+        if (err == null) {
+          setState(() {
+            _errMessage = '';
+          });
+          try {
+            var value = JsonElement.fromString(text);
+            widget.onValueChanged?.call(value);
+          } catch (e) {
             hasError = true;
+            error(object: this, message: 'analyze error', err: e);
             setState(() {
-              error(object: this, message: 'analyze error', err: err);
-              _errMessage = err.toString();
+              _errMessage = e.toString();
             });
           }
+        } else {
+          setState(() {
+            error(object: this, message: 'analyze error', err: err);
+            _errMessage = err.toString();
+          });
         }
       }
-    });
+    }
     return hasError;
+  }
+
+  Future<bool> _analyze() async {
+    _editController.analyzeError = null;
+    var hasError = false;
+    //Wait for input complete
+    await Future.delayed(const Duration(seconds: 1));
+    if ((_lastInput == null ||
+            DateTime.now().difference(_lastInput!) >=
+                const Duration(seconds: 1)) &&
+        _editController.text.isNotEmpty) {
+      hasError = _analyzeSync();
+    }
+    return Future.value(hasError);
   }
 
   /// Format code when TextField out of focus.

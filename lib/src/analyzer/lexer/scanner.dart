@@ -192,10 +192,10 @@ abstract class Scanner {
   /// An operator token represent operators like ':'
   void appendPrecedenceToken(TokenType type) {
     appendToken(SimpleToken(
-      type: type,
-      charOffset: tokenStart,
-      line: lineStarts.length,
-    ));
+        type: type,
+        charOffset: tokenStart,
+        line: lineStarts.length,
+        comments: comments));
   }
 
   /// Notifies scanning a whitespace character. Note that [appendWhiteSpace] is
