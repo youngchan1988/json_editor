@@ -362,6 +362,12 @@ abstract class Scanner {
       return tokenizeComment(next);
     }
 
+    if (identical(next, $MINUS)) {
+      var peekNext = peek();
+      if (peekNext >= $0 && next <= $9) {
+        return tokenizeNumber(next);
+      }
+    }
     if (next >= $0 && next <= $9) {
       return tokenizeNumber(next);
     }

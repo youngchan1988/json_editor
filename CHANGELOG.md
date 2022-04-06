@@ -1,3 +1,7 @@
+## 0.0.7
+
+- fix: [使用 JsonEditor.object 时，当为负数时，格式校验不通过 · Issue #6 · youngchan1988/json_editor (github.com)](https://github.com/youngchan1988/json_editor/issues/6)
+
 ## 0.0.6
 
 - fix: [Logger, onValueChanged and comment issue · Issue #5 · youngchan1988/json_editor (github.com)](https://github.com/youngchan1988/json_editor/issues/5)
