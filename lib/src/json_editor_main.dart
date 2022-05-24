@@ -306,7 +306,6 @@ class _JsonEditorState extends State<JsonEditor> {
       fontSize: 14.0,
     );
     final numberColor = Colors.blueGrey.shade900;
-    print(textStyle.fontSize);
     // Copy important attributes
     numberTextStyle = numberTextStyle.copyWith(
       color: numberTextStyle.color ?? numberColor,
