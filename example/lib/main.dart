@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 import 'package:json_editor/json_editor.dart';
@@ -100,8 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: JsonEditorTheme(
                       themeData: JsonEditorThemeData(
                         lightTheme: JsonTheme.light().copyWith(
-                          commentStyle: TextStyle(fontSize: 25)
-                        ),
+                            commentStyle: const TextStyle(fontSize: 25)),
                       ),
                       child: JsonEditor.string(
                         // jsonString: '''

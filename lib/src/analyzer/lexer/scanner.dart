@@ -710,7 +710,7 @@ abstract class Scanner {
     //     next
     //      v
     //     EOF
-    TokenType type = closeBraceInfoFor(begin);
+    // TokenType type = closeBraceInfoFor(begin);
     // appendToken(SyntheticToken(type, tokenStart)..beforeSynthetic = tail);
     begin.endToken = tail;
     prependErrorToken(UnmatchedToken(begin));
@@ -863,12 +863,12 @@ class Utf8BytesScanner extends Scanner {
   int stringOffsetSlackOffset = -1;
 
   bool containsBomAt(int offset) {
-    const List<int> BOM_UTF8 = [0xEF, 0xBB, 0xBF];
+    const List<int> bomUtf8 = [0xEF, 0xBB, 0xBF];
 
     return offset + 3 < bytes.length &&
-        bytes[offset] == BOM_UTF8[0] &&
-        bytes[offset + 1] == BOM_UTF8[1] &&
-        bytes[offset + 2] == BOM_UTF8[2];
+        bytes[offset] == bomUtf8[0] &&
+        bytes[offset + 1] == bomUtf8[1] &&
+        bytes[offset + 2] == bomUtf8[2];
   }
 
   /// Returns the unicode code point starting at the byte offset [startOffset]

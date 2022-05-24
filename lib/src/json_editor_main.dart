@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_editor/json_editor.dart';
@@ -548,7 +549,9 @@ class _JsonEditorState extends State<JsonEditor> {
       try {
         hasError = _analyzeSync();
       } on Exception catch (error) {
-        print(error);
+        if (kDebugMode) {
+          print(error);
+        }
         return true;
       }
     }

@@ -2,11 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// ignore_for_file: avoid_shadowing_type_parameters
+
 import 'link_implementation.dart'
     show LinkBuilderImplementation, LinkEntry, LinkIterator, MappedLinkIterable;
 
 class Link<T> implements Iterable<T> {
-
   const Link();
   T get head => throw StateError("no elements");
   Link<T>? get tail => null;
@@ -87,7 +88,7 @@ class Link<T> implements Iterable<T> {
   String toString() => "[]";
 
   @override
-  get length {
+  int get length {
     throw UnsupportedError('get:length');
   }
 
@@ -140,7 +141,8 @@ class Link<T> implements Iterable<T> {
   @override
   Iterable<K> expand<K>(Iterable<K> Function(T e) f) => _unsupported('expand');
   @override
-  T firstWhere(bool Function(T e) f, {T Function()? orElse}) => _unsupported('firstWhere');
+  T firstWhere(bool Function(T e) f, {T Function()? orElse}) =>
+      _unsupported('firstWhere');
   @override
   K fold<K>(K initialValue, K Function(K value, T element) combine) {
     return _unsupported('fold');
@@ -151,14 +153,16 @@ class Link<T> implements Iterable<T> {
   @override
   T get last => _unsupported('get:last');
   @override
-  T lastWhere(bool Function(T e) f, {T Function()? orElse}) => _unsupported('lastWhere');
+  T lastWhere(bool Function(T e) f, {T Function()? orElse}) =>
+      _unsupported('lastWhere');
   @override
   String join([separator = '']) => _unsupported('join');
   @override
   T reduce(T Function(T a, T b) combine) => _unsupported('reduce');
   Iterable<T> retype<T>() => _unsupported('retype');
   @override
-  T singleWhere(bool Function(T e) f, {T Function()? orElse}) => _unsupported('singleWhere');
+  T singleWhere(bool Function(T e) f, {T Function()? orElse}) =>
+      _unsupported('singleWhere');
   @override
   Iterable<T> skipWhile(bool Function(T e) f) => _unsupported('skipWhile');
   @override

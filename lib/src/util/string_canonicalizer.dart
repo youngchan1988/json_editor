@@ -21,18 +21,18 @@ class Node {
 /// Gives about 3% speedup on dart2js.
 class StringCanonicalizer {
   /// Mask away top bits to keep hash calculation within 32-bit SMI range.
-  static const int MASK = 16 * 1024 * 1024 - 1;
+  static const int mask = 16 * 1024 * 1024 - 1;
 
-  static const int INITIAL_SIZE = 8 * 1024;
+  static const int initialSize = 8 * 1024;
 
   /// Linear size of a hash table.
-  int _size = INITIAL_SIZE;
+  int _size = initialSize;
 
   /// Items in a hash table.
   int _count = 0;
 
   /// The table itself.
-  List<Node?> _nodes = List<Node?>.filled(INITIAL_SIZE, /* fill = */ null);
+  List<Node?> _nodes = List<Node?>.filled(initialSize, /* fill = */ null);
 
   static String decode(List<int> data, int start, int end, bool asciiOnly) {
     String s;
@@ -47,7 +47,7 @@ class StringCanonicalizer {
   static int hashBytes(List<int> data, int start, int end) {
     int h = 5381;
     for (int i = start; i < end; i++) {
-      h = ((h << 5) + h + data[i]) & MASK;
+      h = ((h << 5) + h + data[i]) & mask;
     }
     return h;
   }
@@ -55,12 +55,12 @@ class StringCanonicalizer {
   static int hashString(String data, int start, int end) {
     int h = 5381;
     for (int i = start; i < end; i++) {
-      h = ((h << 5) + h + data.codeUnitAt(i)) & MASK;
+      h = ((h << 5) + h + data.codeUnitAt(i)) & mask;
     }
     return h;
   }
 
-  rehash() {
+  void rehash() {
     int newSize = _size * 2;
     List<Node?> newNodes = List<Node?>.filled(newSize, /* fill = */ null);
     for (int i = 0; i < _size; i++) {
@@ -113,8 +113,8 @@ class StringCanonicalizer {
     return payload;
   }
 
-  clear() {
-    _size = INITIAL_SIZE;
+  void clear() {
+    _size = initialSize;
     _nodes = List<Node?>.filled(_size, /* fill = */ null);
     _count = 0;
   }

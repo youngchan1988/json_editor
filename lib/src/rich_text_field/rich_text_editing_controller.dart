@@ -2,8 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:json_editor/src/analyzer/error.dart';
 import 'package:json_editor/src/analyzer/lexer/error_token.dart';
@@ -100,7 +98,7 @@ class RichTextEditingController extends TextEditingController {
     String unrenderedText = '';
     var offset = 0;
     var renderOffsets = spanMap.keys;
-    var utf8Codes = utf8.encode(text);
+    // var utf8Codes = utf8.encode(text);
     while (offset < text.length) {
       if (renderOffsets.contains(offset)) {
         if (unrenderedText.isNotEmpty) {

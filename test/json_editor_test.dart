@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_editor/src/analyzer/analyzer.dart';
 import 'package:json_editor/src/analyzer/lexer/lexer.dart';
