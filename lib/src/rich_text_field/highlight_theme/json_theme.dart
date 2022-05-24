@@ -55,8 +55,8 @@ class JsonTheme implements HighlightTheme {
           decoration: TextDecoration.underline));
 
   factory JsonTheme.dark() => JsonTheme(
-      defaultStyle: TextStyle(color: Colors.white, fontSize: 14),
-      bracketStyle: TextStyle(color: Colors.white70, fontSize: 14),
+      defaultStyle: const TextStyle(color: Colors.white, fontSize: 14),
+      bracketStyle: const TextStyle(color: Colors.white70, fontSize: 14),
       numberStyle: TextStyle(color: Colors.blue.shade500, fontSize: 14),
       stringStyle: TextStyle(color: Colors.green.shade800, fontSize: 14),
       boolStyle: TextStyle(color: Colors.orange.shade800, fontSize: 14),
@@ -124,12 +124,49 @@ class JsonTheme implements HighlightTheme {
     TextStyle? errorStyle,
   }) =>
       JsonTheme(
-          defaultStyle: defaultStyle ?? this.defaultStyle,
-          bracketStyle: bracketStyle ?? this.bracketStyle,
-          numberStyle: numberStyle ?? this.numberStyle,
-          stringStyle: stringStyle ?? this.stringStyle,
-          boolStyle: boolStyle ?? this.boolStyle,
-          keyStyle: keyStyle ?? this.keyStyle,
-          commentStyle: commentStyle ?? this.commentStyle,
-          errorStyle: errorStyle ?? this.errorStyle);
+        defaultStyle: defaultStyle ?? this.defaultStyle,
+        bracketStyle: bracketStyle ?? this.bracketStyle,
+        numberStyle: numberStyle ?? this.numberStyle,
+        stringStyle: stringStyle ?? this.stringStyle,
+        boolStyle: boolStyle ?? this.boolStyle,
+        keyStyle: keyStyle ?? this.keyStyle,
+        commentStyle: commentStyle ?? this.commentStyle,
+        errorStyle: errorStyle ?? this.errorStyle,
+      );
+
+  double? get getBiggestFontSize {
+    final defaultSize = defaultStyle.fontSize;
+    final bracketSize = bracketStyle.fontSize;
+    final numberSize = numberStyle.fontSize;
+    final stringSize = stringStyle.fontSize;
+    final boolSize = boolStyle.fontSize;
+    final keySize = keyStyle.fontSize;
+    final commentSize = commentStyle.fontSize;
+    final errorSize = errorStyle.fontSize;
+    return _getMax([
+      defaultSize,
+      bracketSize,
+      numberSize,
+      stringSize,
+      boolSize,
+      keySize,
+      commentSize,
+      errorSize,
+    ]);
+  }
+
+  double? _getMax(List<double?> items) {
+    if (items.isEmpty) return null;
+    double? result = items.first;
+    for (double? item in items) {
+      if (result == null) {
+        result = item;
+        continue;
+      }
+      if (item != null && item > result) {
+        result = item;
+      }
+    }
+    return result;
+  }
 }

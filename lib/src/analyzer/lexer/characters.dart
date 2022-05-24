@@ -4,6 +4,8 @@
 /// BSD-style license that can be found in the LICENSE file.
 ///
 
+// ignore_for_file: constant_identifier_names
+
 const int $EOF = 0;
 const int $STX = 2;
 const int $BS = 8;

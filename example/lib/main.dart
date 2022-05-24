@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 import 'package:json_editor/json_editor.dart';
@@ -80,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     obj: _elementResult?.toObject(),
                                   )));
                         },
-                        child: Text('Object Demo')),
+                        child: const Text('Object Demo')),
                     const SizedBox(
                       width: 16,
                     ),
@@ -91,26 +93,42 @@ class _MyHomePageState extends State<MyHomePage> {
                                     element: _elementResult,
                                   )));
                         },
-                        child: Text('Element Demo')),
+                        child: const Text('Element Demo')),
                   ],
                 ),
                 Expanded(
                   child: Theme(
                     data: _darkMode ? ThemeData.dark() : ThemeData.light(),
-                    child: JsonEditor.string(
-                      jsonString: '''
-                      {
-                        // This is a comment
-                        "name": "young chan",
-                        "number": 100,
-                        "boo": true,
-                        "user": {"age": 20, "tall": 1.8},
-                        "cities": ["beijing", "shanghai", "shenzhen"]
-                      }''',
-                      onValueChanged: (value) {
-                        _elementResult = value;
-                        print(value);
-                      },
+                    child: JsonEditorTheme(
+                      themeData: JsonEditorThemeData(
+                        lightTheme: JsonTheme.light().copyWith(
+                            commentStyle: const TextStyle(fontSize: 25)),
+                      ),
+                      child: JsonEditor.string(
+                        // jsonString: '''
+                        // {
+                        //   // This is a comment
+                        //   "name": "young chan",
+                        //   "number": 100,
+                        //   "boo": true,
+                        //   "user": {"age": 20, "tall": 1.8},
+                        //   "cities": ["beijing", "shanghai", "shenzhen"]
+                        // }''',
+                        initialString: '''
+                        {
+                          // This is a comment
+                          "name": "young chan",
+                          "number": 100,
+                          "boo": true,
+                          "user": {"age": 20, "tall": 1.8},
+                          "cities": ["beijing", "shanghai", "shenzhen"]
+                        }''',
+                        onValueChanged: (value) {
+                          _elementResult = value;
+                          print(value);
+                        },
+                        showLineNumber: false,
+                      ),
                     ),
                   ),
                 )
@@ -127,7 +145,7 @@ class ObjectDemoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Object Demo'),
+        title: const Text('Object Demo'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -154,7 +172,7 @@ class ElementDemoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Element Demo'),
+        title: const Text('Element Demo'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

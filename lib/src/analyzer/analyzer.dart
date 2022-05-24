@@ -24,6 +24,12 @@ class JsonAnalyzer {
           advanceToken = _analyzeObject(advanceToken);
         } else if (optional('[', advanceToken)) {
           advanceToken = _analyzeArray(advanceToken);
+        } else {
+          throw SyntaxError(
+            character: token.lexeme,
+            charOffset: token.charOffset,
+            line: token.line,
+          );
         }
       }
       return null;
