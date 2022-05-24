@@ -233,10 +233,11 @@ class _JsonEditorState extends State<JsonEditor> {
         focusNode: _editFocus,
         controller: _editController,
         decoration: InputDecoration(
-            border: InputBorder.none,
-            isDense: true,
-            errorText: _errMessage,
-            errorMaxLines: 10),
+          border: InputBorder.none,
+          isDense: true,
+          errorText: _errMessage,
+          errorMaxLines: 10,
+        ),
         keyboardType: TextInputType.multiline,
         expands: true,
         maxLines: null,
@@ -382,7 +383,12 @@ class _JsonEditorState extends State<JsonEditor> {
             DateTime.now().difference(_lastInput!) >=
                 const Duration(seconds: 1)) &&
         _editController.text.isNotEmpty) {
-      hasError = _analyzeSync();
+      try {
+        hasError = _analyzeSync();
+      } on Exception catch (error) {
+        print(error);
+        return true;
+      }
     }
     return Future.value(hasError);
   }
