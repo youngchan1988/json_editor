@@ -127,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           _elementResult = value;
                           print(value);
                         },
+                        showLineNumber: false,
                       ),
                     ),
                   ),

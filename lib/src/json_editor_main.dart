@@ -26,6 +26,7 @@ class JsonEditor extends StatefulWidget {
     this.jsonObj,
     this.enabled = true,
     this.openDebug = false,
+    this.showLineNumber = true,
     this.onValueChanged,
     this.onRawValueChanged,
     this.lineNumberStyle = const LineNumberStyle(),
@@ -41,6 +42,7 @@ class JsonEditor extends StatefulWidget {
     String? initialString,
     bool enabled = true,
     bool openDebug = false,
+    bool showLineNumber = true,
     ValueChanged<JsonElement>? onValueChanged,
     ValueChanged<String>? onRawValueChanged,
     LineNumberStyle lineNumberStyle = const LineNumberStyle(),
@@ -56,6 +58,7 @@ class JsonEditor extends StatefulWidget {
         onRawValueChanged: onRawValueChanged,
         lineNumberBuilder: lineNumberBuilder,
         lineNumberStyle: lineNumberStyle,
+        showLineNumber: showLineNumber,
       );
 
   factory JsonEditor.object({
@@ -63,6 +66,7 @@ class JsonEditor extends StatefulWidget {
     Object? object,
     bool enabled = true,
     bool openDebug = false,
+    bool showLineNumber = true,
     ValueChanged<JsonElement>? onValueChanged,
     ValueChanged<String>? onRawValueChanged,
     LineNumberStyle lineNumberStyle = const LineNumberStyle(),
@@ -77,6 +81,7 @@ class JsonEditor extends StatefulWidget {
         onRawValueChanged: onRawValueChanged,
         lineNumberBuilder: lineNumberBuilder,
         lineNumberStyle: lineNumberStyle,
+        showLineNumber: showLineNumber,
       );
 
   factory JsonEditor.element({
@@ -84,6 +89,7 @@ class JsonEditor extends StatefulWidget {
     JsonElement? element,
     bool enabled = true,
     bool openDebug = false,
+    bool showLineNumber = true,
     ValueChanged<JsonElement>? onValueChanged,
     ValueChanged<String>? onRawValueChanged,
     LineNumberStyle lineNumberStyle = const LineNumberStyle(),
@@ -98,6 +104,7 @@ class JsonEditor extends StatefulWidget {
         onRawValueChanged: onRawValueChanged,
         lineNumberBuilder: lineNumberBuilder,
         lineNumberStyle: lineNumberStyle,
+        showLineNumber: showLineNumber,
       );
 
   final String? jsonString;
@@ -117,6 +124,9 @@ class JsonEditor extends StatefulWidget {
 
   /// A way to replace specific line numbers by a custom TextSpan
   final TextSpan Function(int, TextStyle?)? lineNumberBuilder;
+
+  /// show or hide line numbers. default is true
+  final bool showLineNumber;
 
   static Map<String, JsonElement> _fromValue(Map map) {
     return map.map((key, value) {
@@ -176,9 +186,11 @@ class _JsonEditorState extends State<JsonEditor> {
 
   @override
   void initState() {
-    _controllers = LinkedScrollControllerGroup();
-    _numberScroll = _controllers?.addAndGet();
-    _codeScroll = _controllers?.addAndGet();
+    if (widget.showLineNumber) {
+      _controllers = LinkedScrollControllerGroup();
+      _numberScroll = _controllers?.addAndGet();
+      _codeScroll = _controllers?.addAndGet();
+    }
     _numberController = LineNumberController(widget.lineNumberBuilder);
     _editController.addListener(_onTextChanged);
     if (widget.initialString != null) {
@@ -248,6 +260,7 @@ class _JsonEditorState extends State<JsonEditor> {
   }
 
   void _onTextChanged() {
+    if (!widget.showLineNumber) return;
     // Rebuild line number
     final str = _editController.text.split("\n");
     final buf = <String>[];
@@ -338,6 +351,48 @@ class _JsonEditorState extends State<JsonEditor> {
       child: lineNumberCol,
     );
 
+    final textField = TextField(
+      readOnly: !widget.enabled,
+      scrollController: _codeScroll,
+      focusNode: _editFocus,
+      controller: _editController,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        isDense: true,
+        errorText: _errMessage,
+        errorMaxLines: 10,
+      ),
+      keyboardType: TextInputType.multiline,
+      expands: true,
+      maxLines: null,
+      minLines: null,
+      onChanged: (s) {
+        widget.onRawValueChanged?.call(s);
+        if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.enter) {
+          // Enter key
+          var editingOffset = _editController.selection.baseOffset;
+          if (editingOffset == 0) {
+            return;
+          }
+          _enterFormat();
+        } else if (_currentKeyEvent?.logicalKey ==
+                LogicalKeyboardKey.braceLeft ||
+            _currentKeyEvent?.logicalKey == LogicalKeyboardKey.braceRight) {
+          _closingFormat(open: '{', close: '}');
+        } else if (_currentKeyEvent?.logicalKey ==
+                LogicalKeyboardKey.bracketLeft ||
+            _currentKeyEvent?.logicalKey == LogicalKeyboardKey.bracketRight) {
+          _closingFormat(open: '[', close: ']');
+        } else if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.quote) {
+          _closingFormat(open: '"', close: '"');
+        }
+        _lastInput = DateTime.now();
+        //Analyze json syntax
+        _analyze();
+        _undoRedoInput(s);
+      },
+    );
+
     return RawKeyboardListener(
       focusNode: _focus,
       onKey: (keyEvent) {
@@ -372,65 +427,23 @@ class _JsonEditorState extends State<JsonEditor> {
           }
         }
       },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          numberCol,
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) => _wrapInScrollView(
-                minWidth: constraints.maxWidth,
-                textStyle: textStyle,
-                child: TextField(
-                  readOnly: !widget.enabled,
-                  scrollController: _codeScroll,
-                  focusNode: _editFocus,
-                  controller: _editController,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    errorText: _errMessage,
-                    errorMaxLines: 10,
+      child: widget.showLineNumber
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                numberCol,
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => _wrapInScrollView(
+                      minWidth: constraints.maxWidth,
+                      textStyle: textStyle,
+                      child: textField,
+                    ),
                   ),
-                  keyboardType: TextInputType.multiline,
-                  expands: true,
-                  maxLines: null,
-                  minLines: null,
-                  onChanged: (s) {
-                    widget.onRawValueChanged?.call(s);
-                    if (_currentKeyEvent?.logicalKey ==
-                        LogicalKeyboardKey.enter) {
-                      // Enter key
-                      var editingOffset = _editController.selection.baseOffset;
-                      if (editingOffset == 0) {
-                        return;
-                      }
-                      _enterFormat();
-                    } else if (_currentKeyEvent?.logicalKey ==
-                            LogicalKeyboardKey.braceLeft ||
-                        _currentKeyEvent?.logicalKey ==
-                            LogicalKeyboardKey.braceRight) {
-                      _closingFormat(open: '{', close: '}');
-                    } else if (_currentKeyEvent?.logicalKey ==
-                            LogicalKeyboardKey.bracketLeft ||
-                        _currentKeyEvent?.logicalKey ==
-                            LogicalKeyboardKey.bracketRight) {
-                      _closingFormat(open: '[', close: ']');
-                    } else if (_currentKeyEvent?.logicalKey ==
-                        LogicalKeyboardKey.quote) {
-                      _closingFormat(open: '"', close: '"');
-                    }
-                    _lastInput = DateTime.now();
-                    //Analyze json syntax
-                    _analyze();
-                    _undoRedoInput(s);
-                  },
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
+              ],
+            )
+          : textField,
     );
   }
 
