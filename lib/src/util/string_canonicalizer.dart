@@ -5,12 +5,12 @@
 import 'dart:convert';
 
 class Node {
+  Node(this.data, this.start, this.end, this.payload, this.next);
   dynamic /* String | List<int> */ data;
   int start;
   int end;
   String payload;
   Node? next;
-  Node(this.data, this.start, this.end, this.payload, this.next);
 }
 
 /// A hash table for triples:
@@ -32,14 +32,14 @@ class StringCanonicalizer {
   int _count = 0;
 
   /// The table itself.
-  List<Node?> _nodes = new List<Node?>.filled(INITIAL_SIZE, /* fill = */ null);
+  List<Node?> _nodes = List<Node?>.filled(INITIAL_SIZE, /* fill = */ null);
 
   static String decode(List<int> data, int start, int end, bool asciiOnly) {
     String s;
     if (asciiOnly) {
-      s = new String.fromCharCodes(data, start, end);
+      s = String.fromCharCodes(data, start, end);
     } else {
-      s = new Utf8Decoder(allowMalformed: true).convert(data, start, end);
+      s = const Utf8Decoder(allowMalformed: true).convert(data, start, end);
     }
     return s;
   }
@@ -62,7 +62,7 @@ class StringCanonicalizer {
 
   rehash() {
     int newSize = _size * 2;
-    List<Node?> newNodes = new List<Node?>.filled(newSize, /* fill = */ null);
+    List<Node?> newNodes = List<Node?>.filled(newSize, /* fill = */ null);
     for (int i = 0; i < _size; i++) {
       Node? t = _nodes[i];
       while (t != null) {
@@ -108,14 +108,14 @@ class StringCanonicalizer {
     } else {
       payload = decode(data, start, end, asciiOnly);
     }
-    _nodes[index] = new Node(data, start, end, payload, s);
+    _nodes[index] = Node(data, start, end, payload, s);
     _count++;
     return payload;
   }
 
   clear() {
     _size = INITIAL_SIZE;
-    _nodes = new List<Node?>.filled(_size, /* fill = */ null);
+    _nodes = List<Node?>.filled(_size, /* fill = */ null);
     _count = 0;
   }
 }

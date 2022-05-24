@@ -863,7 +863,7 @@ class Utf8BytesScanner extends Scanner {
   int stringOffsetSlackOffset = -1;
 
   bool containsBomAt(int offset) {
-    const List<int> BOM_UTF8 = const [0xEF, 0xBB, 0xBF];
+    const List<int> BOM_UTF8 = [0xEF, 0xBB, 0xBF];
 
     return offset + 3 < bytes.length &&
         bytes[offset] == BOM_UTF8[0] &&
@@ -902,7 +902,7 @@ class Utf8BytesScanner extends Scanner {
     // _Utf8Decoder instance. Also the sublist is eagerly allocated.
     String codePoint =
         utf8.decode(bytes.sublist(startOffset, end), allowMalformed: true);
-    if (codePoint.length == 0) {
+    if (codePoint.isEmpty) {
       // The UTF-8 decoder discards leading BOM characters.
       // TODO(floitsch): don't just assume that removed characters were the
       // BOM.

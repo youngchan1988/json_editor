@@ -124,10 +124,11 @@ class RichTextEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan(
-      {required BuildContext context,
-      TextStyle? style,
-      required bool withComposing}) {
+  TextSpan buildTextSpan({
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
+  }) {
     assert(!value.composing.isValid ||
         !withComposing ||
         value.isComposingRangeValid);
