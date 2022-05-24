@@ -98,7 +98,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Theme(
                     data: _darkMode ? ThemeData.dark() : ThemeData.light(),
                     child: JsonEditor.string(
-                      jsonString: '''
+                      onRawValueChanged: (value) {
+                        print(value);
+                      },
+                      // jsonString: '''
+                      // {
+                      //   // This is a comment
+                      //   "name": "young chan",
+                      //   "number": 100,
+                      //   "boo": true,
+                      //   "user": {"age": 20, "tall": 1.8},
+                      //   "cities": ["beijing", "shanghai", "shenzhen"]
+                      // }''',
+                      initialString: '''
                       {
                         // This is a comment
                         "name": "young chan",

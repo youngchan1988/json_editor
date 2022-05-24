@@ -15,66 +15,84 @@ import 'rich_text_field/rich_text_editing_controller.dart';
 import 'util/string_util.dart';
 
 class JsonEditor extends StatefulWidget {
-  JsonEditor._(
-      {Key? key,
-      this.jsonString,
-      this.jsonObj,
-      this.enabled = true,
-      this.openDebug = false,
-      this.onValueChanged})
-      : assert(jsonObj == null || jsonObj is Map || jsonObj is List),
+  JsonEditor._({
+    Key? key,
+    this.jsonString,
+    this.initialString,
+    this.jsonObj,
+    this.enabled = true,
+    this.openDebug = false,
+    this.onValueChanged,
+    this.onRawValueChanged,
+  })  : assert(jsonObj == null || jsonObj is Map || jsonObj is List),
         super(key: key) {
     initialLogger(openDebug: openDebug);
   }
 
-  factory JsonEditor.string(
-          {Key? key,
-          String? jsonString,
-          bool enabled = true,
-          bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+  factory JsonEditor.string({
+    Key? key,
+    String? jsonString,
+    String? initialString,
+    bool enabled = true,
+    bool openDebug = false,
+    ValueChanged<JsonElement>? onValueChanged,
+    ValueChanged<String>? onRawValueChanged,
+  }) =>
       JsonEditor._(
-          key: key,
-          jsonString: jsonString,
-          enabled: enabled,
-          openDebug: openDebug,
-          onValueChanged: onValueChanged);
+        key: key,
+        jsonString: jsonString,
+        initialString: initialString,
+        enabled: enabled,
+        openDebug: openDebug,
+        onValueChanged: onValueChanged,
+        onRawValueChanged: onRawValueChanged,
+      );
 
-  factory JsonEditor.object(
-          {Key? key,
-          Object? object,
-          bool enabled = true,
-          bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+  factory JsonEditor.object({
+    Key? key,
+    Object? object,
+    bool enabled = true,
+    bool openDebug = false,
+    ValueChanged<JsonElement>? onValueChanged,
+    ValueChanged<String>? onRawValueChanged,
+  }) =>
       JsonEditor._(
         key: key,
         jsonObj: object,
         enabled: enabled,
         openDebug: openDebug,
         onValueChanged: onValueChanged,
+        onRawValueChanged: onRawValueChanged,
       );
 
-  factory JsonEditor.element(
-          {Key? key,
-          JsonElement? element,
-          bool enabled = true,
-          bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+  factory JsonEditor.element({
+    Key? key,
+    JsonElement? element,
+    bool enabled = true,
+    bool openDebug = false,
+    ValueChanged<JsonElement>? onValueChanged,
+    ValueChanged<String>? onRawValueChanged,
+  }) =>
       JsonEditor._(
         key: key,
         jsonString: element?.toString(),
         enabled: enabled,
         openDebug: openDebug,
         onValueChanged: onValueChanged,
+        onRawValueChanged: onRawValueChanged,
       );
 
   final String? jsonString;
+  final String? initialString;
   final Object? jsonObj;
   final bool enabled;
   final bool openDebug;
 
   /// Output the decoded json object.
   final ValueChanged<JsonElement>? onValueChanged;
+
+  /// Output the raw String.
+  final ValueChanged<String>? onRawValueChanged;
 
   static Map<String, JsonElement> _fromValue(Map map) {
     return map.map((key, value) {
@@ -125,6 +143,13 @@ class _JsonEditorState extends State<JsonEditor> {
 
   @override
   void initState() {
+    if (widget.initialString != null) {
+      _editController.text = widget.initialString!;
+      if (!_analyzeSync()) {
+        _reformat();
+      }
+      _undoRedo.set(_editController.text);
+    }
     if (widget.jsonString != null) {
       _editController.text = widget.jsonString!;
       if (!_analyzeSync()) {
@@ -217,6 +242,7 @@ class _JsonEditorState extends State<JsonEditor> {
         maxLines: null,
         minLines: null,
         onChanged: (s) {
+          widget.onRawValueChanged?.call(s);
           if (_currentKeyEvent?.logicalKey == LogicalKeyboardKey.enter) {
             // Enter key
             var editingOffset = _editController.selection.baseOffset;
