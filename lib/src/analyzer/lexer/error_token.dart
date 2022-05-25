@@ -146,5 +146,6 @@ String closeBraceFor(String openBrace) {
 String closeQuoteFor(String openQuote) {
   return const {
     '"': '"',
+    '\'': '\'',
   }[openQuote]!;
 }
