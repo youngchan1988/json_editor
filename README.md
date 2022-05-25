@@ -11,7 +11,7 @@
 
 ```yaml
 dependencies:
-    json_editor: ^0.0.7
+    json_editor: ^0.0.8
 ```
 
 ## Screen Shot
@@ -40,7 +40,6 @@ JsonEditor.string(
         print(value);
     },
 )
-
 ```
 
 ```dart
@@ -71,7 +70,6 @@ JsonEditor.element(
         print(value);
     },
 )
-
 ```
 
 ### Theme
