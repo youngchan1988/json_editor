@@ -342,6 +342,7 @@ class _JsonEditorState extends State<JsonEditor> {
           try {
             var value = JsonElement.fromString(text);
             widget.onValueChanged?.call(value);
+            widget.onErrorChanged?.call("");
           } catch (e) {
             hasError = true;
             error(object: this, message: 'analyze error', err: e);
