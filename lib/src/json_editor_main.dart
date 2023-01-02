@@ -21,7 +21,9 @@ class JsonEditor extends StatefulWidget {
       this.jsonObj,
       this.enabled = true,
       this.openDebug = false,
-      this.onValueChanged})
+      this.onValueChanged,
+      this.onErrorChanged,
+      })
       : assert(jsonObj == null || jsonObj is Map || jsonObj is List),
         super(key: key) {
     initialLogger(openDebug: openDebug);
@@ -32,26 +34,33 @@ class JsonEditor extends StatefulWidget {
           String? jsonString,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<String>? onErrorChanged,
+          }) =>
       JsonEditor._(
           key: key,
           jsonString: jsonString,
           enabled: enabled,
           openDebug: openDebug,
-          onValueChanged: onValueChanged);
+          onValueChanged: onValueChanged,
+          onErrorChanged: onErrorChanged,
+      );
 
   factory JsonEditor.object(
           {Key? key,
           Object? object,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<String>? onErrorChanged,
+          }) =>
       JsonEditor._(
         key: key,
         jsonObj: object,
         enabled: enabled,
         openDebug: openDebug,
         onValueChanged: onValueChanged,
+        onErrorChanged: onErrorChanged,
       );
 
   factory JsonEditor.element(
@@ -59,13 +68,16 @@ class JsonEditor extends StatefulWidget {
           JsonElement? element,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged}) =>
+          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<String>? onErrorChanged,
+          }) =>
       JsonEditor._(
         key: key,
         jsonString: element?.toString(),
         enabled: enabled,
         openDebug: openDebug,
         onValueChanged: onValueChanged,
+        onErrorChanged: onErrorChanged,
       );
 
   final String? jsonString;
@@ -75,6 +87,7 @@ class JsonEditor extends StatefulWidget {
 
   /// Output the decoded json object.
   final ValueChanged<JsonElement>? onValueChanged;
+  final ValueChanged<String>? onErrorChanged;
 
   static Map<String, JsonElement> _fromValue(Map map) {
     return map.map((key, value) {
@@ -341,6 +354,15 @@ class _JsonEditorState extends State<JsonEditor> {
             error(object: this, message: 'analyze error', err: err);
             _errMessage = err.toString();
           });
+          try {
+            widget.onErrorChanged?.call(_errMessage ?? "analyze error");
+          } catch (e) {
+            hasError = true;
+            error(object: this, message: 'analyze error', err: e);
+            setState(() {
+              _errMessage = e.toString();
+            });
+          }
         }
       }
     }

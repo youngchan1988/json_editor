@@ -111,6 +111,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         _elementResult = value;
                         print(value);
                       },
+                      onErrorChanged: (value){
+                        print(value);
+                      },
                     ),
                   ),
                 )
@@ -139,6 +142,9 @@ class ObjectDemoPage extends StatelessWidget {
             var fromJson = JsonElement.fromJson(json);
             print(fromJson);
           },
+          onErrorChanged: (value){
+            print(value);
+          },
         ),
       ),
     );
@@ -165,6 +171,9 @@ class ElementDemoPage extends StatelessWidget {
             print(json);
             var fromJson = JsonElement.fromJson(json);
             print(fromJson);
+          },
+          onErrorChanged: (value){
+            print(value);
           },
         ),
       ),
