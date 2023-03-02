@@ -34,7 +34,7 @@ class JsonEditor extends StatefulWidget {
           String? jsonString,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<JsonElement?>? onValueChanged,
           ValueChanged<Object>? onError,
           }) =>
       JsonEditor._(
@@ -51,7 +51,7 @@ class JsonEditor extends StatefulWidget {
           Object? object,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<JsonElement?>? onValueChanged,
           ValueChanged<Object>? onError,
           }) =>
       JsonEditor._(
@@ -68,7 +68,7 @@ class JsonEditor extends StatefulWidget {
           JsonElement? element,
           bool enabled = true,
           bool openDebug = false,
-          ValueChanged<JsonElement>? onValueChanged,
+          ValueChanged<JsonElement?>? onValueChanged,
           ValueChanged<Object>? onError,
           }) =>
       JsonEditor._(
@@ -86,7 +86,7 @@ class JsonEditor extends StatefulWidget {
   final bool openDebug;
 
   /// Output the decoded json object.
-  final ValueChanged<JsonElement>? onValueChanged;
+  final ValueChanged<JsonElement?>? onValueChanged;
   final ValueChanged<Object>? onError;
 
   static Map<String, JsonElement> _fromValue(Map map) {
@@ -175,7 +175,11 @@ class _JsonEditorState extends State<JsonEditor> {
       _undoRedo.set(_editController.text);
     } else if (widget.jsonObj != oldWidget.jsonObj) {
       try {
-        _editController.text = jsonEncode(widget.jsonObj);
+        if (widget.jsonObj == null) {
+          _editController.text = "";
+        } else {
+          _editController.text = jsonEncode(widget.jsonObj);
+        }
         _reformat();
         _undoRedo.set(_editController.text);
       } catch (e) {
@@ -376,9 +380,12 @@ class _JsonEditorState extends State<JsonEditor> {
     await Future.delayed(const Duration(seconds: 1));
     if ((_lastInput == null ||
             DateTime.now().difference(_lastInput!) >=
-                const Duration(seconds: 1)) &&
-        _editController.text.isNotEmpty) {
-      hasError = _analyzeSync();
+                const Duration(seconds: 1))) {
+      if (_editController.text.isNotEmpty) {
+        hasError = _analyzeSync();
+      } else {
+        widget.onValueChanged?.call(null);
+      }
     }
     return Future.value(hasError);
   }
