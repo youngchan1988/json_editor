@@ -17,4 +17,4 @@ abstract class HighlightTheme {
   TextStyle get defaultStyle;
 }
 
-enum HighlightDataType { int, double, string, bool, key, comment, error }
+enum HighlightDataType { int, double, string, bool, key, comment, error, nullValue }

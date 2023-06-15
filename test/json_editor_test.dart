@@ -39,20 +39,20 @@ void main() {
   group('Anylyzer', () {
     test('Anlyze 1', () {
       var error = JsonAnalyzer().analyze(
-          '{"name": "you", "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3]}}');
+          '{"name": "you", "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3]}, "null": null}');
       expect(error, null);
     });
 
     test('Anlyze 2', () {
       var error = JsonAnalyzer().analyze(
-          '{\n   "name": "you""name":, "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3]}}');
+          '{\n   "name": "you""name":, "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3]}}, null: null');
       var passed = error != null;
       expect(passed, true);
     });
 
     test('Anlyze 2', () {
       var error = JsonAnalyzer().analyze(
-          '{\n   "name": "you", "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3]}');
+          '{\n   "name": "you", "age": 23, "child": true, "obj": { "serialNo": [ 1, 2, 3],"null":null}');
       var passed = error != null;
       expect(passed, true);
     });

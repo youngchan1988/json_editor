@@ -47,6 +47,9 @@ class JsonElement {
           (tokens.lexeme == 'true' || tokens.lexeme == 'false')) {
         value = tokens.lexeme == 'true';
         valueType = JsonElementValueType.bool;
+     } else if (tokens.type == TokenType.IDENTIFIER && tokens.lexeme == 'null') {
+        value = 'null';
+        valueType = JsonElementValueType.nullValue;
       } else if (tokens.lexeme == '{') {
         value = [];
         valueType = JsonElementValueType.map;
@@ -97,6 +100,8 @@ class JsonElement {
       valueType = JsonElementValueType.numeric;
     } else if (valueTypeStr == JsonElementValueType.bool.toString()) {
       valueType = JsonElementValueType.bool;
+    } else if (valueTypeStr == JsonElementValueType.nullValue.toString()) {
+      valueType = JsonElementValueType.nullValue;
     } else if (valueTypeStr == JsonElementValueType.map.toString()) {
       valueType = JsonElementValueType.map;
       elementValue =
@@ -269,4 +274,4 @@ class JsonElement {
   }
 }
 
-enum JsonElementValueType { numeric, string, bool, array, map }
+enum JsonElementValueType { numeric, string, bool, array, map, nullValue }
