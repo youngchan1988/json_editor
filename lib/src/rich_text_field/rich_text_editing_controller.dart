@@ -58,6 +58,10 @@ class RichTextEditingController extends TextEditingController {
           span = TextSpan(
               text: tokens.lexeme,
               style: jsonTheme.typeStyle[HighlightDataType.bool]);
+        } else if (tokens.lexeme == 'null') {
+          span = TextSpan(
+              text: tokens.lexeme,
+              style: jsonTheme.typeStyle[HighlightDataType.nullValue]);
         } else if (tokens.type == TokenType.INT) {
           span = TextSpan(
               text: tokens.lexeme,
